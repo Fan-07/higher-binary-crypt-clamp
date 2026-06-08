@@ -1,62 +1,67 @@
-local CryptoFolder = game.ReplicatedStorage.Crypto
+local CryptoFolder = game.ReplicatedStorage:WaitForChild("Crypto")
 
-local Base32 = require(CryptoFolder.Base32)
-local Base58 = require(CryptoFolder.Base58)
-local Base64 = require(CryptoFolder.Base64)
-local Base100 = require(CryptoFolder.Base100)
+local Base32 = require(CryptoFolder:WaitForChild("Base32"))
+local Base58 = require(CryptoFolder:WaitForChild("Base58"))
+local Base64 = require(CryptoFolder:WaitForChild("Base64"))
+local Base100 = require(CryptoFolder:WaitForChild("Base100"))
 
-print("1 = Base32")
-print("2 = Base58")
-print("3 = Base64")
-print("4 = Base100")
+-- Dispatcher table
+local Crypto = {
+	[1] = Base32,
+	[2] = Base58,
+	[3] = Base64,
+	[4] = Base100,
+}
 
-local encoding = tonumber(io.read())
+-- INPUTS (replace these with GUI values later)
+local encoding = 1 -- 1=Base32, 2=Base58, 3=Base64, 4=Base100
+local mode = "E"   -- "E" = Encode, "D" = Decode
+local text = "Hello World"
 
-print("E = Encrypt")
-print("D = Decrypt")
+-- Get selected module
+local module = Crypto[encoding]
 
-local mode = string.upper(io.read())
-
-print("Text:")
-local text = io.read()
-
-local result
-
-if encoding == 1 then
-
-	if mode == "E" then
-		result = Base32.Encode(text)
-	else
-		result = Base32.Decode(text)
-	end
-
-elseif encoding == 2 then
-
-	if mode == "E" then
-		result = Base58.Encode(text)
-	else
-		result = Base58.Decode(text)
-	end
-
-elseif encoding == 3 then
-
-	if mode == "E" then
-		result = Base64.Encode(text)
-	else
-		result = Base64.Decode(text)
-	end
-
-elseif encoding == 4 then
-
-	if mode == "E" then
-		result = Base100.Encode(text)
-	else
-		result = Base100.Decode(text)
-	end
-
-else
-	error("Invalid encoding")
+-- Safety check 1: valid encoding selection
+if not module then
+	error("❌ Invalid encoding selected (must be 1-4)")
 end
 
-print("Result:")
+-- Safety check 2: Encode/Decode functions exist
+if type(module.Encode) ~= "function" then
+	error("❌ Selected module is missing Encode function")
+end
+
+if type(module.Decode) ~= "function" then
+	error("❌ Selected module is missing Decode function")
+end
+
+-- Safety check 3: valid mode
+mode = string.upper(mode)
+
+if mode ~= "E" and mode ~= "D" then
+	error("false\ Mode must be 'E' (Encode) or 'D' (Decode)")
+end
+
+-- Optional safety check 4: empty input
+if text == nil or text == "" then
+	error("false\ Input text cannot be empty")
+end
+
+-- Execute
+local result
+
+local success, err = pcall(function()
+	if mode == "E" then
+		result = module.Encode(text)
+	else
+		result = module.Decode(text)
+	end
+end)
+
+-- Final safety wrapper
+if not success then
+	error("false\ Encoding/Decoding failed: " .. tostring(err))
+end
+
+print("✔ Result:")
 print(result)
