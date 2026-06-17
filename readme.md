@@ -13,3 +13,4 @@ hierarchy goes:
 
 Replicated storage -> Crypt file -> all base scripts
 Serverscriptservice -> Main.luau
+shows only in the output window, there exists a repo with UI integration on my profile
